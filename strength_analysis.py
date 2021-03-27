@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib as mp
+import math as m
+
+def ceil(value, prefix):
+    return 10**(prefix)*(m.ceil(value*10**(-prefix)))
+
+# Safety factor
+
+N = 2.5
+
+# Material constants
+
+E_AL = 69*10**9
+E_ST = 180*10**9
+
+RHO_AL = 2700
+RHO_ST = 7900
+
+YIELD_STRENGTH_AL = 95*10**6
+YIELD_STRENGTH_ST = 502*10**6
+
+SHEAR_STRENGTH_AL = 0.5*YIELD_STRENGTH_AL
+SHEAR_STRENGTH_ST = 0.5*YIELD_STRENGTH_ST
+
+ALLOW_AL = YIELD_STRENGTH_AL/N
+ALLOW_SHEAR_AL = SHEAR_STRENGTH_AL/N
+
+# Known values
+
+LOAD = 7.5*10**3
+LINK_LENGTH = 181*10**(-3)
+THETA_MIN = m.radians(26.23)
+THETA_MAX = m.radians(75.21)
+LINK_DIAMETER = 11*10**(-3)
+LINK_CROSS_SECTIONAL_AREA = LINK_DIAMETER**2*m.pi/4
+LINK_AREA_MOMENT_OF_INERTIA = m.pi*LINK_DIAMETER**4/64
+
+# Calculated link values
+
+LINK_MAX_COMPRESSIVE_FORCE = LOAD/(2*m.sin(THETA_MIN))
+LINK_BUCKLING_FORCE = m.pi**2*E_AL*LINK_AREA_MOMENT_OF_INERTIA/(LINK_LENGTH**2)
+
+# Calculated bolt values
+
+BOLT_ALLOW_SHEAR = SHEAR_STRENGTH_ST/N
+BOLT_DIAMETER = ceil(m.sqrt(4*LINK_MAX_COMPRESSIVE_FORCE/(m.pi*BOLT_ALLOW_SHEAR)),-3)
+BOLT_LENGTH = ceil(LINK_MAX_COMPRESSIVE_FORCE*m.cos(THETA_MIN)/(BOLT_DIAMETER*ALLOW_AL), -3)
+
+print(BOLT_LENGTH)
