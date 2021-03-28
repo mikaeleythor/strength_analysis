@@ -9,6 +9,12 @@ def ceil(value, prefix):
 def buckling_diameter(compressive_force, length, safety_factor, youngs_modulus, end_conditions):
     return 2*((2*safety_factor*compressive_force*length**2)/(end_conditions*m.pi**3*youngs_modulus))**(1/4)
 
+def round_shaft_dimensions(stress_allow, Kt, ratio, inner_diameter, compressive_force):
+    outer_diameter = inner_diameter/ratio
+    length = stress_allow*outer_diameter**2*(m.pi*outer_diameter/16-inner_diameter/3)/(Kt*compressive_force)
+    return outer_diameter, length
+
+
 # Safety factor
 
 N = 2.5
@@ -57,9 +63,6 @@ BOLT_DIAMETER = ceil(m.sqrt(4*LINK_MAX_COMPRESSIVE_FORCE/(m.pi*BOLT_ALLOW_SHEAR)
 
 LINK_END_WIDTH = ceil(LINK_MAX_COMPRESSIVE_FORCE*m.cos(THETA_MIN)/(BOLT_DIAMETER*ALLOW_AL), -3)
 
-# print(BOLT_DIAMETER)
-# print(LINK_END_WIDTH)
-
 print('Design decision: Two links will be fastened to a single cylindrical nut for power screw')
 print('Consequently, each link bears the load {:.2f}kN'.format(LINK_MAX_COMPRESSIVE_FORCE/2000))
 
@@ -80,3 +83,29 @@ print('Due to bearing stress the link must have an end width of at least {:.2f}m
 print('The nut/bolt length is larger than {:.2f}mm'.format(4*LINK_END_WIDTH_2*1000+15))
 
 LINK_END_HEIGHT_2 = 0.03                                            # Design decision
+
+# An approximation for the nut/bolt width due to bending stress and shear stress must be made
+
+POWER_SCREW_INNER_DIAMETER = ceil(m.sqrt(4*POWER_SCREW_TENSILE_FORCE/(m.pi*ALLOW_ST)),-3)
+
+print('Minimum allowable minor diameter of power screw is {:.2f}mm'.format(POWER_SCREW_INNER_DIAMETER*1000))
+
+POWER_SCREW_MAJOR_DIAMETER = 0.024
+POWER_SCREW_MINOR_DIAMETER = 0.018
+POWER_SCREW_PITCH = 0.003
+
+
+Kt = 1.9
+ratio = 0.3
+
+BOLT_OUTER_DIAMETER, BOLT_OUTER_LENGTH = round_shaft_dimensions(YIELD_STRENGTH_ST/1.5, Kt, ratio, POWER_SCREW_MAJOR_DIAMETER, POWER_SCREW_TENSILE_FORCE/2)
+
+BOLT_OUTER_LENGTH = ceil(BOLT_OUTER_LENGTH, -3)
+BOLT_OUTER_DIAMETER = ceil(BOLT_OUTER_DIAMETER, -3)
+
+print(f'Minimum outer diameter: {BOLT_OUTER_DIAMETER*1000}mm')
+print(f'Maximum outer length: {BOLT_OUTER_LENGTH*1000}mm')
+
+print(YIELD_STRENGTH_ST)
+
+print(BOLT_DIAMETER_2)
