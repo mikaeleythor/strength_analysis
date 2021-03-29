@@ -56,8 +56,7 @@ LINK_BUCKLING_FORCE = m.pi**2*E_AL*LINK_AREA_MOMENT_OF_INERTIA/(LINK_LENGTH**2)
 
 # Calculated bolt values 
 
-BOLT_ALLOW_SHEAR = SHEAR_STRENGTH_ST/N
-BOLT_DIAMETER = ceil(m.sqrt(4*LINK_MAX_COMPRESSIVE_FORCE/(m.pi*BOLT_ALLOW_SHEAR)),-3)
+BOLT_DIAMETER = ceil(m.sqrt(4*LINK_MAX_COMPRESSIVE_FORCE/(m.pi*ALLOW_SHEAR_ST)),-3)
 
 # Related link values
 
@@ -70,7 +69,7 @@ LINK_DIAMETER_2 = ceil(buckling_diameter(LINK_MAX_COMPRESSIVE_FORCE/2, LINK_LENG
 
 print('Buckling diameter of each link is {:.2f}mm'.format(LINK_DIAMETER_2*1000))
 
-POWER_SCREW_TENSILE_FORCE = 2*LOAD*m.cos(THETA_MIN)/m.sin(THETA_MIN)
+POWER_SCREW_TENSILE_FORCE = LOAD*m.cos(THETA_MIN)/m.sin(THETA_MIN)
 BOLT_MAX_SHEAR_FORCE = POWER_SCREW_TENSILE_FORCE/2
 BOLT_DIAMETER_2 = ceil(m.sqrt(4*BOLT_MAX_SHEAR_FORCE/(m.pi*ALLOW_SHEAR_ST)),-3)
 
@@ -78,6 +77,7 @@ print('Maximum shear force between links and nut is {:.2f}kN'.format(BOLT_MAX_SH
 print('Consequently, the bolt diameter must be at least {:.2f}mm'.format(BOLT_DIAMETER_2*1000))
 
 LINK_END_WIDTH_2 = ceil(LINK_MAX_COMPRESSIVE_FORCE/2*m.cos(THETA_MIN)/(BOLT_DIAMETER_2*ALLOW_AL), -3)
+LINK_END_WIDTH_2 = ceil(LINK_MAX_COMPRESSIVE_FORCE/(2*BOLT_DIAMETER_2*ALLOW_AL),-3)
 
 print('Due to bearing stress the link must have an end width of at least {:.2f}mm'.format(LINK_END_WIDTH_2*1000))
 print('The nut/bolt length is larger than {:.2f}mm'.format(4*LINK_END_WIDTH_2*1000+15))
@@ -104,8 +104,12 @@ BOLT_OUTER_LENGTH = ceil(BOLT_OUTER_LENGTH, -3)
 BOLT_OUTER_DIAMETER = ceil(BOLT_OUTER_DIAMETER, -3)
 
 print(f'Minimum outer diameter: {BOLT_OUTER_DIAMETER*1000}mm')
-print(f'Maximum outer length: {BOLT_OUTER_LENGTH*1000}mm')
+print('Maximum outer length: {:.2f}mm'.format(BOLT_OUTER_LENGTH*1000))
 
-print(YIELD_STRENGTH_ST)
+# Top- and bottom-piece
 
-print(BOLT_DIAMETER_2)
+print('The material chosen for the top and bottom pieces must withstand the bearing stress of the bolts')
+
+BOTTOM_RIB_WIDTH = ceil(LINK_MAX_COMPRESSIVE_FORCE/(2*BOLT_DIAMETER_2*ALLOW_ST),-3)
+
+print('Minimum bottom rib width due to bearing stress is {:.2f}mm'.format(BOTTOM_RIB_WIDTH*1000))
